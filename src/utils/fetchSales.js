@@ -8,7 +8,7 @@ export async function fetchSales(csvUrl) {
   const { data, errors } = Papa.parse(text, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: h => h.trim().toLowerCase(),
+    transformHeader: h => h.trim().toLowerCase().replace(/^﻿/, ''),
     relaxQuotes: true,
     relaxColumnCount: true,
   })
