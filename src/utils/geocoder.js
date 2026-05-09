@@ -71,22 +71,27 @@ export async function geocodeAll(rawSales, onProgress) {
   const results = []
   let done = 0
 
-  // First pass: resolve all from cache synchronously
-  const pending = []
+  // Rows with lat/lng already in the CSV skip geocoding entirely
+  const needsGeocoding = []
   for (const sale of rawSales) {
+    if (sale.lat !== null && sale.lng !== null && !isNaN(sale.lat) && !isNaN(sale.lng)) {
+      results.push(sale)
+      done++
+      onProgress?.(done, rawSales.length)
+      continue
+    }
     const cached = getCached(sale.address)
     if (cached) {
       results.push({ ...sale, ...cached })
       done++
       onProgress?.(done, rawSales.length)
     } else {
-      pending.push(sale)
+      needsGeocoding.push(sale)
     }
   }
 
-  // Queue all cache misses, then drain
   const geocoded = await Promise.all(
-    pending.map(sale =>
+    needsGeocoding.map(sale =>
       geocodeAddress(sale.address).then(coords => {
         done++
         onProgress?.(done, rawSales.length)
