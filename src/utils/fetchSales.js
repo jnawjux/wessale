@@ -19,7 +19,7 @@ export async function fetchSales(csvUrl) {
 
   const cols = Object.keys(data[0])
   for (const col of ['id', 'address', 'description']) {
-    if (!cols.includes(col)) throw new Error(`Sheet is missing required column: "${col}". Expected columns: id, address, description.`)
+    if (!cols.includes(col)) throw new Error(`Sheet is missing required column: "${col}". Columns found: ${cols.map(c => `"${c}" (${[...c].map(ch => ch.charCodeAt(0)).join(',')})`).join(', ')}`)
   }
 
   return data.map(row => ({
