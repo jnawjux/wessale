@@ -1,0 +1,27 @@
+import Papa from 'papaparse'
+
+export async function fetchSales(csvUrl) {
+  const res = await fetch(csvUrl)
+  if (!res.ok) throw new Error(`Could not fetch sheet (HTTP ${res.status}). Make sure the sheet is published to the web.`)
+  const text = await res.text()
+
+  const { data, errors } = Papa.parse(text, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: h => h.trim().toLowerCase(),
+  })
+
+  if (errors.length) throw new Error(`CSV parse error: ${errors[0].message}`)
+  if (!data.length) throw new Error('The sheet appears to be empty.')
+
+  const cols = Object.keys(data[0])
+  for (const col of ['id', 'address', 'description']) {
+    if (!cols.includes(col)) throw new Error(`Sheet is missing required column: "${col}". Expected columns: id, address, description.`)
+  }
+
+  return data.map(row => ({
+    id: String(row.id).trim(),
+    address: String(row.address).trim(),
+    description: String(row.description).trim(),
+  })).filter(row => row.id && row.address)
+}
