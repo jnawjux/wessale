@@ -9,9 +9,12 @@ export async function fetchSales(csvUrl) {
     header: true,
     skipEmptyLines: true,
     transformHeader: h => h.trim().toLowerCase(),
+    relaxQuotes: true,
+    relaxColumnCount: true,
   })
 
-  if (errors.length) throw new Error(`CSV parse error: ${errors[0].message}`)
+  const fatalErrors = errors.filter(e => e.type === 'Delimiter' || e.type === 'Abort')
+  if (fatalErrors.length) throw new Error(`CSV parse error: ${fatalErrors[0].message}`)
   if (!data.length) throw new Error('The sheet appears to be empty.')
 
   const cols = Object.keys(data[0])
