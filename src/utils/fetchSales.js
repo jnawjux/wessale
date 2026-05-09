@@ -5,6 +5,10 @@ export async function fetchSales(csvUrl) {
   if (!res.ok) throw new Error(`Could not fetch sheet (HTTP ${res.status}). Make sure the sheet is published to the web.`)
   const text = await res.text()
 
+  if (text.trimStart().startsWith('<')) {
+    throw new Error('The URL returned an HTML page instead of CSV data. Make sure you are using the export URL (ending in export?format=csv), not the regular edit link.')
+  }
+
   const { data, errors } = Papa.parse(text, {
     header: true,
     skipEmptyLines: true,
@@ -19,7 +23,7 @@ export async function fetchSales(csvUrl) {
 
   const cols = Object.keys(data[0])
   for (const col of ['id', 'address', 'description']) {
-    if (!cols.includes(col)) throw new Error(`Sheet is missing required column: "${col}". Columns found: ${cols.map(c => `"${c}" (${[...c].map(ch => ch.charCodeAt(0)).join(',')})`).join(', ')}`)
+    if (!cols.includes(col)) throw new Error(`Sheet is missing required column: "${col}". Expected columns: id, address, description.`)
   }
 
   return data.map(row => ({
