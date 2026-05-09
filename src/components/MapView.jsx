@@ -23,6 +23,13 @@ const closestIcon = L.divIcon({
   iconAnchor: [12, 32],
 })
 
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: '<div class="user-location-dot"><div class="user-location-pulse"></div></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+})
+
 function iconFor(sale, selectedSaleId, closestIds) {
   if (sale.id === selectedSaleId) return selectedIcon
   if (closestIds.includes(sale.id)) return closestIcon
@@ -44,10 +51,11 @@ function FitBounds({ sales }) {
   return null
 }
 
-export default function MapView({ sales, selectedSaleId, closestIds, onSelectSale }) {
-  const center = sales.length
-    ? [sales[0].lat, sales[0].lng]
-    : [39.5, -98.35] // center of USA fallback
+export default function MapView({ sales, allSales, selectedSaleId, closestIds, userLocation, onSelectSale }) {
+  const initialSales = allSales?.length ? allSales : sales
+  const center = initialSales.length
+    ? [initialSales[0].lat, initialSales[0].lng]
+    : [39.5, -98.35]
 
   return (
     <div className="map-container">
@@ -56,7 +64,7 @@ export default function MapView({ sales, selectedSaleId, closestIds, onSelectSal
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FitBounds sales={sales} />
+        <FitBounds sales={initialSales} />
         {sales.map(sale => (
           <Marker
             key={sale.id}
@@ -65,6 +73,12 @@ export default function MapView({ sales, selectedSaleId, closestIds, onSelectSal
             eventHandlers={{ click: () => onSelectSale(sale.id) }}
           />
         ))}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            icon={userLocationIcon}
+          />
+        )}
       </MapContainer>
     </div>
   )

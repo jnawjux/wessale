@@ -22,6 +22,16 @@ export default function App() {
   const [sales, setSales] = useState([])
   const [selectedSaleId, setSelectedSaleId] = useState(null)
   const [activeTags, setActiveTags] = useState(new Set())
+  const [userLocation, setUserLocation] = useState(null)
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {} // silently ignore if denied
+      )
+    }
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -79,6 +89,11 @@ export default function App() {
 
   const closestIds = closestSales.map(s => s.id)
 
+  // When a sale is selected, show only it + nearest 10. Otherwise show all.
+  const displayedSales = selectedSale
+    ? [selectedSale, ...closestSales]
+    : visibleSales
+
   if (status === 'loading') {
     return (
       <div className="status-screen">
@@ -132,9 +147,11 @@ export default function App() {
       />
       <div className="app-body">
         <MapView
-          sales={visibleSales}
+          sales={displayedSales}
+          allSales={visibleSales}
           selectedSaleId={selectedSaleId}
           closestIds={closestIds}
+          userLocation={userLocation}
           onSelectSale={setSelectedSaleId}
         />
         {selectedSale && (
