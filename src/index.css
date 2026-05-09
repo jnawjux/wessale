@@ -6,7 +6,6 @@
   --color-primary: #2563eb;
   --color-primary-dark: #1d4ed8;
   --color-selected: #dc2626;
-  --color-closest: #ea580c;
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
   --color-border: #e2e8f0;
@@ -16,7 +15,7 @@
   --color-tag-text: #1d4ed8;
   --color-tag-active-bg: #2563eb;
   --color-tag-active-text: #ffffff;
-  --header-height: 52px;
+  --header-height: 60px;
   --tag-bar-height: 52px;
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 15px;
@@ -55,11 +54,19 @@ html, body, #root {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .app-subtitle {
   font-size: 13px;
   opacity: 0.8;
+  white-space: nowrap;
+}
+
+.app-header__search {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .app-body {
@@ -78,31 +85,30 @@ html, body, #root {
   min-height: 0;
 }
 
-/* ── Map pin icons ── */
+/* ── Sale number markers ── */
 
-.map-pin {
-  width: 22px;
+.map-marker {
+  width: 30px;
   height: 30px;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  border: 2px solid rgba(0,0,0,0.25);
-}
-
-.map-pin--default {
+  border-radius: 50%;
   background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.1s;
 }
 
-.map-pin--selected {
+.map-marker--selected {
   background: var(--color-selected);
-  width: 26px;
-  height: 34px;
-  border-width: 3px;
-  box-shadow: 0 0 0 4px rgba(220,38,38,0.25);
-}
-
-.map-pin--closest {
-  background: var(--color-closest);
-  box-shadow: 0 0 0 3px rgba(234,88,12,0.2);
+  transform: scale(1.25);
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.3), 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 1000;
 }
 
 /* ── User location dot ── */
@@ -132,6 +138,106 @@ html, body, #root {
 @keyframes pulse {
   0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+
+/* ── Search ── */
+
+.search-panel {
+  position: relative;
+  width: 260px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255,255,255,0.65);
+}
+
+.search-input:focus {
+  background: rgba(255,255,255,0.25);
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 340px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 2000;
+}
+
+.search-result-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-result-btn:hover {
+  background: var(--color-bg);
+}
+
+.search-result-id {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.search-result-address {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.search-result-snippet {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.search-result-snippet mark {
+  background: #fef08a;
+  color: var(--color-text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.search-no-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  z-index: 2000;
 }
 
 /* ── Tag filter bar ── */
@@ -289,59 +395,6 @@ html, body, #root {
   border: 1px solid #bfdbfe;
 }
 
-.info-panel__nearby h3 {
-  margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-muted);
-}
-
-.nearby-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nearby-item__btn {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  transition: background 0.1s;
-}
-
-.nearby-item__btn:hover {
-  background: var(--color-bg);
-}
-
-.nearby-item__id {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-.nearby-item__address {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.nearby-item__tags {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
 /* ── Status screens ── */
 
 .status-screen {
@@ -454,6 +507,12 @@ html, body, #root {
 /* ── Mobile layout ── */
 
 @media (max-width: 768px) {
+  .app-subtitle { display: none; }
+
+  .search-panel { width: 180px; }
+
+  .search-results { width: 280px; }
+
   .app-body {
     flex-direction: column;
   }

@@ -27,6 +27,6 @@ export async function fetchSales(csvUrl) {
     address: String(row.address).trim(),
     description: String(row.description).trim(),
     lat: row.lat ? parseFloat(row.lat) : null,
-    lng: row.lng ? parseFloat(row.lng) : null,
+    lng: (row.lng || row.lon) ? parseFloat(row.lng ?? row.lon) : null,
   })).filter(row => row.id && row.address)
 }

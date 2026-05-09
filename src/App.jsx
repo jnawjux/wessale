@@ -6,14 +6,7 @@ import { extractTags } from './utils/tagExtractor'
 import MapView from './components/MapView'
 import InfoPanel from './components/InfoPanel'
 import TagFilter from './components/TagFilter'
-
-function computeClosest10(target, allSales) {
-  return allSales
-    .filter(s => s.id !== target.id)
-    .map(s => ({ ...s, dist: Math.hypot(s.lat - target.lat, s.lng - target.lng) }))
-    .sort((a, b) => a.dist - b.dist)
-    .slice(0, 10)
-}
+import SearchPanel from './components/SearchPanel'
 
 export default function App() {
   const [status, setStatus] = useState('loading')
@@ -23,12 +16,13 @@ export default function App() {
   const [selectedSaleId, setSelectedSaleId] = useState(null)
   const [activeTags, setActiveTags] = useState(new Set())
   const [userLocation, setUserLocation] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {} // silently ignore if denied
+        () => {}
       )
     }
   }, [])
@@ -58,7 +52,6 @@ export default function App() {
         setStatus('error')
       }
     }
-
     load()
   }, [])
 
@@ -83,16 +76,9 @@ export default function App() {
 
   const selectedSale = sales.find(s => s.id === selectedSaleId) ?? null
 
-  const closestSales = selectedSale
-    ? computeClosest10(selectedSale, visibleSales)
+  const searchResults = searchQuery.trim().length > 1
+    ? sales.filter(s => s.description.toLowerCase().includes(searchQuery.toLowerCase()))
     : []
-
-  const closestIds = closestSales.map(s => s.id)
-
-  // When a sale is selected, show only it + nearest 10. Otherwise show all.
-  const displayedSales = selectedSale
-    ? [selectedSale, ...closestSales]
-    : visibleSales
 
   if (status === 'loading') {
     return (
@@ -138,6 +124,15 @@ export default function App() {
       <header className="app-header">
         <h1 className="app-title">Wessale</h1>
         <span className="app-subtitle">{visibleSales.length} sale{visibleSales.length !== 1 ? 's' : ''}</span>
+        <div className="app-header__search">
+          <SearchPanel
+            sales={sales}
+            query={searchQuery}
+            onQueryChange={setSearchQuery}
+            results={searchResults}
+            onSelectSale={id => { setSelectedSaleId(id); setSearchQuery('') }}
+          />
+        </div>
       </header>
       <TagFilter
         allTags={ALL_TAGS}
@@ -147,19 +142,15 @@ export default function App() {
       />
       <div className="app-body">
         <MapView
-          sales={displayedSales}
-          allSales={visibleSales}
+          sales={visibleSales}
           selectedSaleId={selectedSaleId}
-          closestIds={closestIds}
           userLocation={userLocation}
           onSelectSale={setSelectedSaleId}
         />
         {selectedSale && (
           <InfoPanel
             sale={selectedSale}
-            closestSales={closestSales}
             onClose={() => setSelectedSaleId(null)}
-            onSelectSale={setSelectedSaleId}
           />
         )}
       </div>
