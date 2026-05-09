@@ -1,4 +1,4 @@
-export const SHEET_CSV_URL = import.meta.env.VITE_SHEET_URL ?? ''
+export const CSV_URL = '/sales.csv'
 
 export const TAG_KEYWORDS = {
   Furniture: ['furniture', 'couch', 'sofa', 'table', 'chair', 'desk', 'dresser', 'cabinet', 'shelf', 'bookcase', 'recliner', 'ottoman', 'nightstand'],

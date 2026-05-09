@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { SHEET_CSV_URL, ALL_TAGS } from './config'
+import { CSV_URL, ALL_TAGS } from './config'
 import { fetchSales } from './utils/fetchSales'
 import { geocodeAll } from './utils/geocoder'
 import { extractTags } from './utils/tagExtractor'
@@ -24,15 +24,10 @@ export default function App() {
   const [activeTags, setActiveTags] = useState(new Set())
 
   useEffect(() => {
-    if (!SHEET_CSV_URL) {
-      setStatus('unconfigured')
-      return
-    }
-
     async function load() {
       try {
         setStatus('loading')
-        const rawSales = await fetchSales(SHEET_CSV_URL)
+        const rawSales = await fetchSales(CSV_URL)
 
         setStatus('geocoding')
         setGeocodingProgress({ done: 0, total: rawSales.length })
@@ -83,26 +78,6 @@ export default function App() {
     : []
 
   const closestIds = closestSales.map(s => s.id)
-
-  if (status === 'unconfigured') {
-    return (
-      <div className="status-screen">
-        <div className="status-card">
-          <h1>Wessale — Garage Sale Map</h1>
-          <h2>Setup Required</h2>
-          <p>No garage sale data is configured yet. To get started:</p>
-          <ol>
-            <li>Create a Google Sheet with columns: <code>id</code>, <code>address</code>, <code>description</code></li>
-            <li>Go to <strong>File → Share → Publish to web</strong>, select <strong>CSV</strong> format, and copy the link</li>
-            <li>Create a <code>.env</code> file in the project root with:<br />
-              <code>VITE_SHEET_URL=https://docs.google.com/...</code>
-            </li>
-            <li>Restart the dev server with <code>npm run dev</code></li>
-          </ol>
-        </div>
-      </div>
-    )
-  }
 
   if (status === 'loading') {
     return (
