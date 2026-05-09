@@ -9,7 +9,8 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs'
-import { parse, unparse } from 'papaparse'
+import Papa from 'papaparse'
+const { parse, unparse } = Papa
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
